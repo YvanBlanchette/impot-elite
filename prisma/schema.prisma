@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  email       String   @unique
+  nom         String?
+  prenom      String?
+  telephone   String?
+  adresse     String?
+  ville       String?
+  codePostal  String?
+  province    String?
+
+  // Profil client
+  typeClient         String?
+  sourceAcquisition  String?
+  statutFiscal       String?
+  occupation         String?
+  employeur          String?
+  nbrEnfants         Int?
+  niveauPriorite     String?   @default("normal")
+  typesRevenus       String?
+  revenuFourchette   String?
+  lienDossierExterne String?
+  consentement       Boolean   @default(false)
+  consentementDate   DateTime?
+
+  // Infos sensibles
+  dateNaissance         String?
+  nas                   String?
+  noTps                 String?
+  noTvq                 String?
+  etatCivil             String?
+  conjointNom           String?
+  conjointPrenom        String?
+  conjointNas           String?
+  conjointDateNaissance String?
+
+  notesCrm  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  dossiers  Dossier[]
+}
+
+model Dossier {
+  id        String  @id @default(cuid())
+  annee     Int
+  statut    String  @default("en_attente")
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  dateReceptionDocs  DateTime?
+  dateTransmission   DateTime?
+  montantResultat    Float?
+  tarifFacture       Float?
+  modePaiement       String?
+  transmisARC        Boolean  @default(false)
+  transmisRQ         Boolean  @default(false)
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  documents Document[]
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  nom       String
+  type      String
+  chemin    String
+  dossierId String
+  dossier   Dossier  @relation(fields: [dossierId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  nom         String
+  prix        Float
+  description String
+  features    String[]
+  populaire   Boolean  @default(false)
+  ordre       Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model Supplement {
+  id          String   @id @default(cuid())
+  nom         String   // ex: "Immeuble locatif (par unité)"
+  prix        String?  // Parfois c'est "À partir de..." ou un montant fixe
+  ordre       Int      @default(0)
+}
+
+model Configuration {
+  id          String   @id @default(cuid())
+  cle         String   @unique // ex: "DELAI_PRODUCTION"
+  valeur      String?  // ex: "3 à 5 jours ouvrables"
+  estVisible  Boolean  @default(true) // La fameuse variable de contrôle
+  description String?  // Optionnel : pour aider ton ami à savoir ce que fait cette clé
+  updatedAt   DateTime @updatedAt
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  reponse   String   @db.Text // @db.Text pour permettre des réponses longues
+  ordre     Int      @default(0)
+  publie    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
