@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
+		"build": "prisma generate && next build",
 		"start": "next start",
 		"lint": "eslint",
 		"cloudflare": "npx cloudflared tunnel --url http://127.0.0.1:3000"
