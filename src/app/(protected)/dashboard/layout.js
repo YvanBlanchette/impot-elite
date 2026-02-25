@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileText, Upload, Users, Settings } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Logo from "@/app/(protected)/components/logo";
+import { Logo } from "@/app/(protected)/components/logo";
 
 const navItems = [
 	{ href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },

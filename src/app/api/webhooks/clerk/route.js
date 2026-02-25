@@ -34,20 +34,26 @@ export async function POST(req) {
 	const { type, data } = evt;
 
 	if (type === "user.created") {
-		await prisma.user.upsert({
-			where: { clerkId: data.id },
-			update: {
-				email: data.email_addresses[0]?.email_address ?? "",
-				prenom: data.first_name ?? "",
-				nom: data.last_name ?? "",
-			},
-			create: {
-				clerkId: data.id,
-				email: data.email_addresses[0]?.email_address ?? "",
-				prenom: data.first_name ?? "",
-				nom: data.last_name ?? "",
-			},
-		});
+		console.log("=== USER CREATED ===", data.id, data.email_addresses[0]?.email_address);
+		try {
+			await prisma.user.upsert({
+				where: { clerkId: data.id },
+				update: {
+					email: data.email_addresses[0]?.email_address ?? "",
+					prenom: data.first_name ?? "",
+					nom: data.last_name ?? "",
+				},
+				create: {
+					clerkId: data.id,
+					email: data.email_addresses[0]?.email_address ?? "",
+					prenom: data.first_name ?? "",
+					nom: data.last_name ?? "",
+				},
+			});
+			console.log("=== USER CRÉÉ DANS NEON ===");
+		} catch (err) {
+			console.error("=== ERREUR CRÉATION USER ===", err.message);
+		}
 	}
 
 	if (type === "user.deleted") {
