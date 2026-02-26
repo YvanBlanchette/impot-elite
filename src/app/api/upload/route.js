@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req) {
 	try {
@@ -11,13 +16,10 @@ export async function POST(req) {
 		const user = await prisma.user.findUnique({ where: { clerkId: userId } });
 		if (!user) return Response.json({ error: "Utilisateur introuvable" }, { status: 404 });
 
-		const count = Number(formData.get("count"));
 		const fichiers = formData.getAll("fichiers");
 
-		// Grouper les fichiers par année fiscale pour créer/réutiliser les bons dossiers
 		const dossierCache = {};
 		const getDossier = async (anneeFiscale) => {
-			// Le dossier est pour l'année de déclaration (anneeFiscale + 1)
 			const annee = anneeFiscale + 1;
 			if (dossierCache[annee]) return dossierCache[annee];
 
@@ -38,19 +40,28 @@ export async function POST(req) {
 			const anneeFiscale = Number(formData.get(`annee_${i}`)) || new Date().getFullYear() - 1;
 
 			const dossier = await getDossier(anneeFiscale);
-			const uploadDir = path.join(process.cwd(), "uploads", user.id, String(dossier.annee));
-			await mkdir(uploadDir, { recursive: true });
 
+			// Upload vers Cloudinary
 			const buffer = Buffer.from(await fichier.arrayBuffer());
-			const nomFichier = `${Date.now()}-${fichier.name}`;
-			const chemin = path.join(uploadDir, nomFichier);
-			await writeFile(chemin, buffer);
+			const uploadResult = await new Promise((resolve, reject) => {
+				cloudinary.uploader.upload_stream(
+					{
+						folder: `impot-elite/${user.id}/${dossier.annee}`,
+						resource_type: "auto",
+						public_id: `${Date.now()}-${fichier.name.replace(/\.[^/.]+$/, "")}`,
+					},
+					(error, result) => {
+						if (error) reject(error);
+						else resolve(result);
+					}
+				).end(buffer);
+			});
 
 			await prisma.document.create({
 				data: {
 					nom,
 					type,
-					chemin: path.join("uploads", user.id, String(dossier.annee), nomFichier),
+					chemin: uploadResult.secure_url,
 					dossierId: dossier.id,
 				},
 			});
