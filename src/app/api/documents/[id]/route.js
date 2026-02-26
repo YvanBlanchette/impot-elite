@@ -27,15 +27,13 @@ export async function DELETE(req, { params }) {
 
         if (!doc) return Response.json({ error: "Document introuvable" }, { status: 404 });
 
-        // Supprimer de Cloudinary si c'est une URL Cloudinary
+        // Supprimer de Cloudinary
         if (doc.chemin && doc.chemin.includes("cloudinary.com")) {
             try {
-                // Extraire le public_id de l'URL
-                const matches = doc.chemin.match(/\/impot-elite\/.+\/(.+)\.[^.]+$/);
-                if (matches) {
-                    const publicId = `impot-elite/${doc.chemin.split("/impot-elite/")[1].replace(/\.[^.]+$/, "")}`;
-                    await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-                }
+                const publicId = doc.chemin
+                    .replace(/.*\/upload\/v\d+\//, "")
+                    .replace(/\.[^.]+$/, "");
+                await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
             } catch (e) {
                 console.error("Erreur suppression Cloudinary:", e);
             }
