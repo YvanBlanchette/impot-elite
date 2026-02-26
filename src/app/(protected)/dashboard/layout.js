@@ -7,6 +7,7 @@ import { LayoutDashboard, FileText, Upload, Users, Settings } from "lucide-react
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Logo } from "@/app/(protected)/components/logo";
+import { useEnsureUser } from "@/hooks/use-ensure-user";
 
 const navItems = [
 	{ href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -20,6 +21,7 @@ const adminItems = [
 ];
 
 export default function DashboardLayout({ children }) {
+	useEnsureUser();
 	const { user } = useUser();
 	const pathname = usePathname();
 	const isAdmin = user?.publicMetadata?.role === "admin";
