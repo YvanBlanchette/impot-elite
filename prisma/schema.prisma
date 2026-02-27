@@ -78,6 +78,7 @@ model Document {
   dossierId String
   dossier   Dossier  @relation(fields: [dossierId], references: [id])
   createdAt DateTime @default(now())
+  resourceType  String  @default("image")
 }
 
 model Service {

@@ -56,26 +56,29 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-	try {
-		const { dossierId } = await params;
-		const { searchParams } = new URL(req.url);
-		const userId = searchParams.get("userId");
+    try {
+        const { dossierId } = await params;
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("userId");
 
-		if (!(await verifierAdmin(userId))) {
-			return Response.json({ error: "Accès refusé" }, { status: 403 });
-		}
+        const isAdmin = await verifierAdmin(userId);
+        
+        if (!isAdmin) {
+            // Vérifier si l'user est le propriétaire du dossier
+            const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+            const dossier = await prisma.dossier.findUnique({ where: { id: dossierId } });
+            
+            if (!user || !dossier || dossier.userId !== user.id) {
+                return Response.json({ error: "Accès refusé" }, { status: 403 });
+            }
+        }
 
-		await prisma.document.deleteMany({
-			where: { dossierId },
-		});
+        await prisma.document.deleteMany({ where: { dossierId } });
+        await prisma.dossier.delete({ where: { id: dossierId } });
 
-		await prisma.dossier.delete({
-			where: { id: dossierId },
-		});
-
-		return Response.json({ success: true });
-	} catch (err) {
-		console.error("Erreur suppression dossier:", err.message);
-		return Response.json({ error: err.message }, { status: 500 });
-	}
+        return Response.json({ success: true });
+    } catch (err) {
+        console.error("Erreur suppression dossier:", err.message);
+        return Response.json({ error: err.message }, { status: 500 });
+    }
 }

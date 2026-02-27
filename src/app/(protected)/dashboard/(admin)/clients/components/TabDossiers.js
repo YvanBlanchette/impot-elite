@@ -7,6 +7,7 @@ import { STATUT_CONFIG } from "@/app/(protected)/dashboard/(admin)/clients/compo
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import clsx from "clsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@clerk/nextjs";
 
 const TYPES_DOCUMENT = {
 	declaration_revenus: "Déclaration de revenus",
@@ -23,6 +24,7 @@ const icons = {
 };
 
 export default function TabDossiers({ dossiers: initialDossiers }) {
+	const { userId } = useAuth();
 	const [dossiers, setDossiers] = useState(initialDossiers);
 	const [ouvert, setOuvert] = useState(null);
 	const isAdmin = useIsAdmin();

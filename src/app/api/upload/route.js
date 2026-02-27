@@ -57,14 +57,15 @@ export async function POST(req) {
 				).end(buffer);
 			});
 
-			await prisma.document.create({
+		await prisma.document.create({
 				data: {
-					nom,
-					type,
-					chemin: uploadResult.secure_url,
-					dossierId: dossier.id,
+						nom,
+						type,
+						chemin: uploadResult.secure_url,
+						resourceType: uploadResult.resource_type, // 👈 ajoute cette ligne
+						dossierId: dossier.id,
 				},
-			});
+		});
 		}
 
 		return Response.json({ succes: true });

@@ -3,7 +3,7 @@ import React from "react";
 const WaveSeparator = ({ topColor = "#F2EEEA", bottomColor = "#FFFFFF", isReversed = false }) => {
 	return (
 		<div
-			className={isReversed ? "-mt-1" : "-mt-36"}
+			className={isReversed ? "" : "-mt-36"}
 			style={{ backgroundColor: isReversed ? bottomColor : topColor }}
 		>
 			<svg

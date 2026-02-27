@@ -17,7 +17,7 @@ const navItems = [
 
 const adminItems = [
 	{ href: "/dashboard/clients", label: "Clients", icon: Users },
-	{ href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
+	{ href: "/dashboard/config", label: "Paramètres", icon: Settings },
 ];
 
 export default function DashboardLayout({ children }) {

@@ -95,7 +95,7 @@ export function Navbar({ banner }) {
 						Portail Web
 					</Link>
 					<Button asChild>
-						<Link href="/login">Soumission</Link>
+						<Link href="/sign-in">Soumission</Link>
 					</Button>
 				</div>
 			</div>

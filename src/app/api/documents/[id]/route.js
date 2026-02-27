@@ -27,13 +27,24 @@ export async function DELETE(req, { params }) {
 
         if (!doc) return Response.json({ error: "Document introuvable" }, { status: 404 });
 
-        // Supprimer de Cloudinary
+       // Supprimer de Cloudinary
         if (doc.chemin && doc.chemin.includes("cloudinary.com")) {
             try {
-                const publicId = doc.chemin
-                    .replace(/.*\/upload\/v\d+\//, "")
+                const publicId = decodeURIComponent(doc.chemin)
+                    .replace(/.*\/upload\/(?:v\d+\/)?/, "")
                     .replace(/\.[^.]+$/, "");
-                await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+
+                const resourceType = doc.resourceType || "image";
+
+                console.log("public_id:", publicId);
+                console.log("resource_type:", resourceType);
+
+                const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                console.log("Résultat Cloudinary:", result);
+
+                if (result.result !== "ok") {
+                    console.warn("Cloudinary n'a pas supprimé le fichier:", result);
+                }
             } catch (e) {
                 console.error("Erreur suppression Cloudinary:", e);
             }
@@ -43,6 +54,7 @@ export async function DELETE(req, { params }) {
 
         return Response.json({ succes: true });
     } catch (err) {
+        console.error("Erreur DELETE document:", err);
         return Response.json({ error: err.message }, { status: 500 });
     }
 }
